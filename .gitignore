@@ -1,0 +1,13 @@
+node_modules
+coverage
+dist
+.vscode
+npm0debug.log
+.tmp
+temp
+public
+docs
+.log
+auth.json
+ChatBot.json
+.nvmrc
