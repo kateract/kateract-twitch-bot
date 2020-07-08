@@ -6,6 +6,9 @@ import id from "../auth.json";
 const primaryChannel: string = "kateract"
 const timeoutInterval: number = 10*60*1000;
 
+var streamers: Array<string>;
+var subscribing: boolean = false;
+
 var db = new JsonDB(new Config("ChatBot", true, true, '/'))
 
 const options: Options = {
@@ -25,6 +28,13 @@ client.connect().catch((err: any) => console.log(err));
 
 client.on("connected", (address: any, port: any) => {
     console.log(`Connected to ${address}:${port} as ${id.username}`);
+    try {
+        var data = db.getData("/costreamers")
+    } catch (err) {
+        console.log(err.message);
+    }
+        
+    streamers = data ? data : new Array();
 });
 
 client.on("join", (channel: string, username: string, self: boolean) => {
@@ -42,18 +52,14 @@ client.on("message", (channel: string, tags: ChatUserstate, message: string, sel
         client.say(primaryChannel, `[${channel.substring(1)}] ${tags.username}: ${message}`);
     }
 });
-try {
-    var data = db.getData("/costreamers")
-} catch (err) {
-    console.log(err.message);
-}
-var streamers: Array<string> = data ? data : new Array();
-var subscribing: boolean = false;
 
 var ParseCommand = (channel: string, tags: ChatUserstate, message: string) => {
     var parts = message.split(' ');
     if (parts[0] === "!multi") {
         MultiHandler(parts, channel, tags);
+    }
+    else if(parts[0] === "!so") {
+        client.say(primaryChannel, `@${parts[1]} is kateract approved! Check them out at https://twitch.tv/${parts[1]}`);
     }
 }
 
