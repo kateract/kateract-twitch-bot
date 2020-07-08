@@ -8,6 +8,7 @@ const timeoutInterval: number = 10*60*1000;
 
 var streamers: Array<string>;
 var subscribing: boolean = false;
+var rolling: boolean = false;
 
 var db = new JsonDB(new Config("ChatBot", true, true, '/'))
 
@@ -38,7 +39,7 @@ client.on("connected", (address: any, port: any) => {
 });
 
 client.on("join", (channel: string, username: string, self: boolean) => {
-    if (channel === `#${primaryChannel}`)
+    if (channel === `#${primaryChannel}` && rolling == false)
     {
         RollTimerChats();
     }
@@ -117,6 +118,7 @@ var MultiHandler = (parts: string[], channel: string, tags: ChatUserstate) => {
 var currentRoll = 0
 var rollChats = ["Kateract is a member of theSHED! Find out more about this great gaming community and it's members by visiting https://theshed.gg"]
 var RollTimerChats = () => {
+    rolling = true;
     setTimeout(function run() {
         client.say(primaryChannel, rollChats[currentRoll]);
         currentRoll = (currentRoll + 1) % rollChats.length;
