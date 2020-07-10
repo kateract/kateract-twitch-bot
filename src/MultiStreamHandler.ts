@@ -3,16 +3,13 @@ import { JsonDB } from "node-json-db";
 
 export class MultiStreamHandler
 {
-    private readonly db: JsonDB;
     private readonly streamers: Array<string>;
-    private readonly primaryChannel: string;
-    private readonly client: Client;
     private subscribing: boolean;
 
-    constructor(client: Client, db: JsonDB, primaryChannel: string) {
-        this.db = db;
-        this.client = client;
-        this.primaryChannel = primaryChannel;
+    constructor(private readonly client: Client, 
+        private readonly db: JsonDB, 
+        private readonly primaryChannel: string) 
+    {
         try {
             this.streamers = db.getData("/costreamers");
         } catch {

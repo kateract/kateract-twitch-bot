@@ -3,17 +3,13 @@ import { MultiStreamHandler } from './MultiStreamHandler';
 import { JsonDB } from 'node-json-db';
 export class CommandHandler
 {
-    private readonly client: Client;
     private readonly multi: MultiStreamHandler;
-    private readonly primaryChannel: string;
-    private readonly db: JsonDB;
 
-    constructor(client: Client, db: JsonDB, primaryChannel: string)
+    constructor(private readonly client: Client, 
+        db: JsonDB, 
+        private readonly primaryChannel: string)
     {
         this.multi = new MultiStreamHandler(client, db, primaryChannel);
-        this.primaryChannel = primaryChannel;
-        this.client = client;
-        this.db = db;
     }
 
     public ParseCommand(channel: string, tags: ChatUserstate, message: string): void
