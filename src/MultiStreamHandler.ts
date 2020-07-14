@@ -1,14 +1,16 @@
 import { ChatUserstate, Client } from "tmi.js";
 import { JsonDB } from "node-json-db";
+import { CostreamRelayHandler } from "./CostreamRelayHandler";
 
 export class MultiStreamHandler
 {
     private readonly streamers: Array<string>;
-    private subscribing: boolean;
+    public subscribing: boolean;
 
     constructor(private readonly client: Client, 
         private readonly db: JsonDB, 
-        private readonly primaryChannel: string) 
+        private readonly primaryChannel: string,
+        private readonly corelay: CostreamRelayHandler) 
     {
         try {
             this.streamers = db.getData("/costreamers");
@@ -19,6 +21,7 @@ export class MultiStreamHandler
 
     public Handle(parts: string[], channel: string, tags: ChatUserstate): void
     {
+        console.log(tags);
         if (parts.length == 1) {
             this.AdvertiseCostream(channel)
         }
@@ -30,10 +33,10 @@ export class MultiStreamHandler
             this.ClearCostream();
         }
         else if ((tags.badges?.broadcaster == '1' || tags.mod) && parts.length > 1 && parts[1].toLowerCase() == "subscribe") {
-            this.Subscribe()
+            this.Subscribe(tags)
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "unsubscribe") {
-            this.Unsubscribe();
+            this.Unsubscribe(tags);
         }
     }
 
@@ -62,7 +65,7 @@ export class MultiStreamHandler
         this.db.push("/costreamers", this.streamers);
     }
 
-    private Subscribe(): void {
+    private Subscribe(tags: ChatUserstate): void {
         if (!this.subscribing)
         {
             this.subscribing = true;
@@ -75,10 +78,12 @@ export class MultiStreamHandler
                 this.client.join(streamer);
             }
         });
+        this.corelay.AddSubscriber(tags.username)
     }
 
-    private Unsubscribe(): void {
-        if (this.subscribing)
+    private Unsubscribe(tags: ChatUserstate): void {
+        this.corelay.RemoveSubscriber(tags.username);
+        if (!this.corelay.AreSubscribers)
         {
             this.subscribing = false;
         }
@@ -91,5 +96,9 @@ export class MultiStreamHandler
                 }
             });
         }
+    }
+
+    public IsSubscribing(): boolean {
+        return this.subscribing;
     }
 }

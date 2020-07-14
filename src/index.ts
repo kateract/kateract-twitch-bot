@@ -4,6 +4,7 @@ import { Config } from "node-json-db/dist/lib/JsonDBConfig";
 import { MultiStreamHandler } from "./MultiStreamHandler";
 import id from "../auth.json";
 import { CommandHandler } from './CommandHandler';
+import { CostreamRelayHandler } from './CostreamRelayHandler';
 
 const primaryChannel: string = "kateract";
 const timeoutInterval: number = 10*60*1000;
@@ -28,7 +29,9 @@ const options: Options = {
 };
 
 const client: Client = Client(options);
-const command: CommandHandler = new CommandHandler(client, db, primaryChannel);
+const corelay: CostreamRelayHandler = new CostreamRelayHandler(client);
+const multi: MultiStreamHandler = new MultiStreamHandler(client, db, primaryChannel, corelay);
+const command: CommandHandler = new CommandHandler(client, db, primaryChannel, timeoutInterval, multi);
 
 client.connect().catch((err: any) => console.log(err));
 
@@ -39,24 +42,16 @@ client.on("connected", (address: any, port: any) => {
 client.on("join", (channel: string, username: string, self: boolean) => {
     if (channel === `#${primaryChannel}` && rolling == false)
     {
-        RollTimerChats();
+        command.RollTimerChats(primaryChannel, rollChats);
     }
 });
 
 client.on("message", (channel: string, tags: ChatUserstate, message: string, self: boolean) => {
     if (self) return;
-    if (message[0] == "!" && channel === `#${primaryChannel}`)
+    else if (message[0] == "!")
         command.ParseCommand(channel, tags, message);
-    if (subscribing && channel !== `#${primaryChannel}`) {
-        client.say(primaryChannel, `[${channel.substring(1)}] ${tags.username}: ${message}`);
+    else if (multi.IsSubscribing()) {
+        corelay.PushMessage(channel, tags, message);
     }
 });
 
-function RollTimerChats(): void 
-{
-    setTimeout(function run() {
-        client.say(primaryChannel, rollChats[currentRoll]);
-        currentRoll = (currentRoll + 1) % rollChats.length;
-        setTimeout(run, timeoutInterval);
-    }, timeoutInterval);
-}

@@ -11,7 +11,10 @@ export class CostreamRelayHandler
 
     public AddSubscriber(channel: string) : boolean
     {
-        this.subscribers.push(channel);
+        if (this.subscribers.indexOf(channel) < 0){
+            this.subscribers.push(channel);
+        }
+        console.log(this.subscribers)
         return this.subscribers.length > 0;
     }
 
@@ -22,8 +25,14 @@ export class CostreamRelayHandler
 
     public PushMessage(channel: string, tags: ChatUserstate, message: string)
     {
-        this.subscribers.filter(s => s != channel).forEach(s => {
-            this.client.say(s, `[${channel}]${tags.username} - ${message}`);
+        console.log (`Message from ${channel}!`)
+        this.subscribers.filter(s => `#${s}` !== channel).forEach(s => {
+            console.log(`relaying message from ${channel} to #${s}!`)
+            this.client.say(s, `[${channel}] ${tags.username}: ${message}`);
         });
+    }
+
+    public AreSubscribers(): boolean {
+        return this.subscribers.length > 0;
     }
 }
