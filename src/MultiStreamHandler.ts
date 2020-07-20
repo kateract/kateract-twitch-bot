@@ -17,11 +17,12 @@ export class MultiStreamHandler
         } catch {
             this.streamers = new Array<string>();
         }
+        this.ResolveChannels();
     }
 
     public Handle(parts: string[], channel: string, tags: ChatUserstate): void
     {
-        console.log(tags);
+        //console.log(tags);
         if (parts.length == 1) {
             this.AdvertiseCostream(channel)
         }
@@ -29,10 +30,15 @@ export class MultiStreamHandler
             && parts.length > 1 && parts[1].toLowerCase() == "add") {
             this.AddCostreamers(parts);
         }
-        else if ((tags.badges?.broadcaster == '1' || tags.mod) && parts.length > 1 && parts[1].toLowerCase() == "clear") {
+        else if ((tags.badges?.broadcaster == '1' || tags.mod) 
+            && parts.length > 1 && parts[1].toLowerCase() == "add") {
+            this.RemoveCostreamers(parts);
+        }else if ((tags.badges?.broadcaster == '1' || tags.mod) 
+            && parts.length > 1 && parts[1].toLowerCase() == "clear") {
             this.ClearCostream();
         }
-        else if ((tags.badges?.broadcaster == '1' || tags.mod) && parts.length > 1 && parts[1].toLowerCase() == "subscribe") {
+        else if ((tags.badges?.broadcaster == '1' || tags.mod) 
+            && parts.length > 1 && parts[1].toLowerCase() == "subscribe") {
             this.Subscribe(tags)
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "unsubscribe") {
@@ -45,7 +51,6 @@ export class MultiStreamHandler
         for (let i = 0; i < this.streamers.length; i++) {
             uri += `/t${this.streamers[i]}`;
         }
-        console.log(`${channel}[${this.primaryChannel}] - ${uri}`)
         this.client.say(channel, `Check out all the streamers here: ${uri}`).catch((err) => console.log(err));
 
     }
@@ -53,16 +58,27 @@ export class MultiStreamHandler
     private AddCostreamers(parts: string[]): void {
                     
         for (let i = 2; i < parts.length; i++) {
-            if (parts[i].trim().length > 0) {
+            if (parts[i].trim().length > 0 && !this.streamers.includes(parts[i])) {
                 this.streamers.push(parts[i]);
             }
         }
         this.db.push("/costreamers", this.streamers);
+        this.ResolveChannels();
+    }
+
+    private RemoveCostreamers(channels: string[]): void
+    {
+        channels.forEach(c => {
+            this.streamers.splice(this.streamers.indexOf(c), 1);
+        });
+    
+        this.ResolveChannels();
     }
 
     private ClearCostream(): void {
         this.streamers.splice(0,this.streamers.length);
         this.db.push("/costreamers", this.streamers);
+        this.ResolveChannels();
     }
 
     private Subscribe(tags: ChatUserstate): void {
@@ -70,14 +86,6 @@ export class MultiStreamHandler
         {
             this.subscribing = true;
         }
-        let curChans = this.client.getChannels()
-        console.log(curChans);
-        this.streamers.forEach(streamer => {
-            if (!curChans.includes(`#${streamer}`))
-            {
-                this.client.join(streamer);
-            }
-        });
         this.corelay.AddSubscriber(tags.username)
     }
 
@@ -87,18 +95,19 @@ export class MultiStreamHandler
         {
             this.subscribing = false;
         }
-        let curChans = this.client.getChannels()
-        {
-            curChans.forEach((chan) => {
-                if(chan != `#${this.primaryChannel}`)
-                {
-                    this.client.part(chan);
-                }
-            });
-        }
+
     }
 
     public IsSubscribing(): boolean {
         return this.subscribing;
     }
+
+    public ResolveChannels(): void {
+        let channels = this.client.getChannels();
+        this.streamers.filter(s => !channels.includes(`#${s}`))
+            .map(c => this.client.join(c));
+        channels.filter(c => !this.streamers.includes(c.substring(1)) && c !== `#${this.primaryChannel}`)
+            .map(c => this.client.part(c));
+    }
+    
 }

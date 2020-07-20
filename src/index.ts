@@ -7,9 +7,10 @@ import { CommandHandler } from './CommandHandler';
 import { CostreamRelayHandler } from './CostreamRelayHandler';
 
 const primaryChannel: string = "kateract";
-const timeoutInterval: number = 10*60*1000;
+const timeoutInterval: number = 5*60*1000;
 let currentRoll = 0
-let rollChats = ["Kateract is a member of theSHED! Find out more about this great gaming community and it's members by visiting https://theshed.gg"]
+let rollChats = ["Nintendo Monday is brought to you by theSHED! Find out more about this great gaming community and it's members by visiting https://theshed.gg",
+                 "Use the !multi command to check out all the streamers live!"]
 
 var rolling: boolean = false;
 let subscribing: boolean = false;
@@ -44,6 +45,7 @@ client.on("join", (channel: string, username: string, self: boolean) => {
     {
         command.RollTimerChats(primaryChannel, rollChats);
     }
+    multi.ResolveChannels();
 });
 
 client.on("message", (channel: string, tags: ChatUserstate, message: string, self: boolean) => {
