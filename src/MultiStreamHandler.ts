@@ -6,6 +6,7 @@ export class MultiStreamHandler
 {
     private readonly streamers: Array<string>;
     public subscribing: boolean;
+    public excludes: Array<string>;
 
     constructor(private readonly client: Client, 
         private readonly db: JsonDB, 
@@ -14,6 +15,7 @@ export class MultiStreamHandler
     {
         try {
             this.streamers = db.getData("/costreamers");
+            this.ResolveChannels()
         } catch {
             this.streamers = new Array<string>();
         }
@@ -31,7 +33,7 @@ export class MultiStreamHandler
             this.AddCostreamers(parts);
         }
         else if ((tags.badges?.broadcaster == '1' || tags.mod) 
-            && parts.length > 1 && parts[1].toLowerCase() == "add") {
+            && parts.length > 1 && parts[1].toLowerCase() == "remove") {
             this.RemoveCostreamers(parts);
         }else if ((tags.badges?.broadcaster == '1' || tags.mod) 
             && parts.length > 1 && parts[1].toLowerCase() == "clear") {
@@ -43,6 +45,9 @@ export class MultiStreamHandler
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "unsubscribe") {
             this.Unsubscribe(tags);
+        }
+        else if (parts.length > 1 && parts[1].toLowerCase() == "exclude") {
+            this.Exclude(parts[2]);
         }
     }
 
@@ -110,4 +115,10 @@ export class MultiStreamHandler
             .map(c => this.client.part(c));
     }
     
+    public Exclude(user: string)
+    {
+        this.corelay.AddExclude(user);
+        this.excludes.push(user);
+        this.db.push('/excludes', this.excludes);
+    }
 }
