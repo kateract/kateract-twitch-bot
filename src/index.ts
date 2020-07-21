@@ -44,6 +44,7 @@ client.on("join", (channel: string, username: string, self: boolean) => {
     if (channel === `#${primaryChannel}` && rolling == false)
     {
         command.RollTimerChats(primaryChannel, rollChats);
+        rolling = true;
     }
     multi.ResolveChannels();
 });
