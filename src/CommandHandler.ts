@@ -1,14 +1,15 @@
 import { ChatUserstate, Client } from 'tmi.js';
 import { MultiStreamHandler } from './MultiStreamHandler';
 import { JsonDB } from 'node-json-db';
+import { StorageService } from './StorageService';
 export class CommandHandler {
     private currentRoll: number;
     constructor(
         private readonly client: Client,
-        db: JsonDB,
         private readonly primaryChannel: string,
         private readonly timeoutInterval: number,
-        private readonly multi: MultiStreamHandler) {
+        private readonly multi: MultiStreamHandler,
+        storage: StorageService) {
         this.currentRoll = 0;
     }
 

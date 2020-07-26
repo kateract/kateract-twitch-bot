@@ -1,24 +1,23 @@
 import { ChatUserstate, Client } from "tmi.js";
-import { JsonDB } from "node-json-db";
 import { CostreamRelayHandler } from "./CostreamRelayHandler";
+import { StorageService } from "./StorageService";
+import { ICatalog } from "./ICatalog";
+import { Streamer } from "./Streamer";
 
 export class MultiStreamHandler
 {
-    private readonly streamers: Array<string>;
+    private readonly streamers:ICatalog<string, Streamer>;
     public subscribing: boolean;
     public excludes: Array<string>;
+    public members: ICatalog<string, Streamer>
 
     constructor(private readonly client: Client, 
-        private readonly db: JsonDB, 
         private readonly primaryChannel: string,
-        private readonly corelay: CostreamRelayHandler) 
+        private readonly corelay: CostreamRelayHandler  ,
+        storage: StorageService) 
     {
-        try {
-            this.streamers = db.getData("/costreamers");
-            this.ResolveChannels()
-        } catch {
-            this.streamers = new Array<string>();
-        }
+        this.members = storage.GetCatalog('members');
+        this.streamers = storage.GetCatalog<string, Streamer>('streamers');
         this.ResolveChannels();
     }
 
@@ -47,14 +46,15 @@ export class MultiStreamHandler
             this.Unsubscribe(tags);
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "exclude") {
-            this.Exclude(parts[2]);
+            this.Exclude(channel, parts[2]);
         }
     }
 
     private AdvertiseCostream(channel: string): void {
         let uri: string = `https://multi.raredrop.co/t${this.primaryChannel}`;
-        for (let i = 0; i < this.streamers.length; i++) {
-            uri += `/t${this.streamers[i]}`;
+        let list = this.members.ListElements()
+        for (let i = 0; i < list.length; i++) {
+            uri += `/t${list[i].data.Name}`;
         }
         this.client.say(channel, `Check out all the streamers here: ${uri}`).catch((err) => console.log(err));
 
@@ -63,27 +63,31 @@ export class MultiStreamHandler
     private AddCostreamers(parts: string[]): void {
                     
         for (let i = 2; i < parts.length; i++) {
-            if (parts[i].trim().length > 0 && !this.streamers.includes(parts[i])) {
-                this.streamers.push(parts[i]);
+            if (parts[i].trim().length > 0 && !this.members.HasElement(parts[i])) {
+                if (this.streamers.HasElement(parts[i])){
+                    this.members.AddElement(parts[i], this.streamers.GetElement(parts[i]));
+                } else {
+                    let streamer = new Streamer();
+                    streamer.Name = parts[i];
+                    this.members.AddElement(streamer.Name, streamer);
+                    this.streamers.AddElement(streamer.Name, streamer);
+                }
             }
         }
-        this.db.push("/costreamers", this.streamers);
         this.ResolveChannels();
     }
 
     private RemoveCostreamers(channels: string[]): void
     {
         channels.forEach(c => {
-            this.streamers.splice(this.streamers.indexOf(c), 1);
+            this.members.RemoveElement(c);
         });
     
         this.ResolveChannels();
     }
 
     private ClearCostream(): void {
-        this.streamers.splice(0,this.streamers.length);
-        this.db.push("/costreamers", this.streamers);
-        this.ResolveChannels();
+        this.members.Clear();
     }
 
     private Subscribe(tags: ChatUserstate): void {
@@ -109,16 +113,16 @@ export class MultiStreamHandler
 
     public ResolveChannels(): void {
         let channels = this.client.getChannels();
-        this.streamers.filter(s => !channels.includes(`#${s}`))
-            .map(c => this.client.join(c));
-        channels.filter(c => !this.streamers.includes(c.substring(1)) && c !== `#${this.primaryChannel}`)
+        let list = this.members.ListElements();
+        list.filter(s => !channels.includes(`#${s.index}`))
+            .map(c => this.client.join(c.index));
+        channels.filter(c => !list.map(f => f.index).includes(c.substr(1)) && c !== `#${this.primaryChannel}`)
             .map(c => this.client.part(c));
     }
     
-    public Exclude(user: string)
+    public Exclude(channel: string, user: string)
     {
-        this.corelay.AddExclude(user);
-        this.excludes.push(user);
-        this.db.push('/excludes', this.excludes);
+        let streamer = this.streamers.GetElement(channel);
+        streamer.Excludes.push(user);
     }
 }
