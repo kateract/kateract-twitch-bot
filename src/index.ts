@@ -6,17 +6,16 @@ import id from "../auth.json";
 import { CommandHandler } from './CommandHandler';
 import { CostreamRelayHandler } from './CostreamRelayHandler';
 import { StorageService } from './StorageService';
+import { TwitchChatService } from './TwitchChatService';
+import { IChatService } from './IChatService';
+import { ChatManager } from './ChatManager';
+import { IChannel } from './IChannel';
 
-const primaryChannel: string = "kateract";
+const primaryChannel: IChannel = {Platform: 'twitch', Channel: "kateract"};
 const timeoutInterval: number = 5*60*1000;
 let rollChats = ["Nintendo Monday is brought to you by theSHED! Find out more about this great gaming community and it's members by visiting https://theshed.gg",
                  "Use the !multi command to check out all the streamers live!"]
 
-var rolling: boolean = false;
-let subscribing: boolean = false;
-
-const db = new JsonDB(new Config("ChatBot", true, true, '/'))
-const storageService = StorageService.GetService(db);
 const options: Options = {
     identity: id,
     options: {
@@ -26,35 +25,21 @@ const options: Options = {
         reconnect: true,
         secure: true
     },
-    channels: [primaryChannel]
+    channels: [primaryChannel.Channel]
 };
 
-const client: Client = Client(options);
-const corelay: CostreamRelayHandler = new CostreamRelayHandler(client);
-const multi: MultiStreamHandler = new MultiStreamHandler(client, primaryChannel, corelay, storageService);
-const command: CommandHandler = new CommandHandler(client, primaryChannel, timeoutInterval, multi, storageService);
+const db = new JsonDB(new Config("ChatBot", true, true, '/'))
+const storageService = StorageService.GetService(db);
+const twitch: IChatService = new TwitchChatService(options);
 
-client.connect().catch((err: any) => console.log(err));
+const manager = new ChatManager();
+manager.AddChatService(twitch);
+manager.JoinChannel({Platform: 'twitch', Channel: 'kateract'})
+manager.Chats$.subscribe(chat => {
+    console.log(`From ${chat.Channel.Platform}: [${chat.Channel.Channel}] ${chat.User.Username}: ${chat.Message}`)
+})
+const corelay: CostreamRelayHandler = new CostreamRelayHandler(manager);
+const multi: MultiStreamHandler = new MultiStreamHandler(manager, primaryChannel, corelay, storageService);
+const command: CommandHandler = new CommandHandler(manager, multi, storageService);
 
-client.on("connected", (address: any, port: any) => {
-    console.log(`Connected to ${address}:${port} as ${id.username}`);
-});
-
-client.on("join", (channel: string, username: string, self: boolean) => {
-    if (channel === `#${primaryChannel}` && rolling == false)
-    {
-        command.RollTimerChats(primaryChannel, rollChats);
-        rolling = true;
-    }
-    multi.ResolveChannels();
-});
-
-client.on("message", (channel: string, tags: ChatUserstate, message: string, self: boolean) => {
-    if (self) return;
-    else if (message[0] == "!")
-        command.ParseCommand(channel, tags, message);
-    else if (multi.IsSubscribing()) {
-        corelay.PushMessage(channel, tags, message);
-    }
-});
 

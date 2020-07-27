@@ -12,14 +12,20 @@ export class StorageService {
     }
 
     private constructor(private readonly db: JsonDB) {}
-    private catalogs: Array<{name:string, catalog:any}>
+    private catalogs: Array<{name:string, catalog:any}> = new Array<{name:string, catalog: any}>();
     
     public GetCatalog<T, U>(name: string): ICatalog<T, U> {
-        let cata = this.catalogs.find(c => c.name === name).catalog;
+        let cata = this.catalogs.find(c => c.name === name);
         if (!cata) {
-            cata = Catalog.GetCatalog<T, U>(name, this.db);
+            console.log(`catalog ${name} not loaded, retrieving...`);
+            cata = {
+                name: name,
+                catalog: Catalog.GetCatalog<T, U>(name, this.db)
+            }
+            this.catalogs.push(cata);
         }
-        return cata;
+        console.log(cata);
+        return cata.catalog;
     }
 
 }

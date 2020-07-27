@@ -1,5 +1,6 @@
 import { JsonDB } from "node-json-db";
 import { ICatalog } from "./ICatalog";
+import deepEqual from "deep-equal";
 
 export class Catalog<T,U> implements ICatalog<T,U>{
     private constructor(private readonly db: JsonDB, 
@@ -8,25 +9,52 @@ export class Catalog<T,U> implements ICatalog<T,U>{
 
     public static GetCatalog<T,U>(name:string, db: JsonDB): Catalog<T,U> {
         let elements: Array<{index: T, data: U}>;
-        if (db.exists(name)) {
-            let data = db.getData(name);
+        if (db.exists(`/${name}`)) {
+            console.log(`db for ${name} exists, loading...`)
+            let data = db.getData(`/${name}`);
             if (data.elements) {
+                
                 elements = data.elements;
-                return new Catalog<T, U>(db, elements, name);
+                console.log(data);
+            } 
+            else 
+            {
+                console.log(`data doesn't element:`)
+                console.log(data);
+                elements = new Array<{index: T, data: U}>();
             }
+            return new Catalog<T, U>(db, elements, name);
+        } 
+        else 
+        {
+            return new Catalog<T,U>(db, new Array<{index: T, data: U}>(), name);
         }
 
     }
 
     public AddElement(index: T, data: U){
-        this.elements.push({index, data});
-        this.db.push(`${name}/elements[${index}]`, data);
+        let idx = this.elements.findIndex(e => deepEqual(e.index, index))
+        if (idx >= 0) {
+            let test:boolean = deepEqual(this.elements[idx].data, data);
+            if(test) {
+                return this.elements[idx].index;
+            }
+        }
+        let pos = this.elements.push({index, data}) - 1;
+        console.log(this.name);
+        let dp =  new DataPoint<T, U>(index, data);
+        if (dp){
+            this.db.push(`/${this.name}/elements[${pos}]`,dp);
+        } else{ 
+            console.log(`${index}, ${data}`)
+        }
         return index;
     }
 
     public RemoveElement(index: T):U{
-        let data = this.elements.splice(this.elements.findIndex(e => e.index == index))
-        this.db.delete(`${name}/elements[${index}]`);
+        let pos = this.elements.findIndex(e => deepEqual(e.index, index))
+        let data = this.elements.splice(pos, 1)
+        this.db.delete(`/${this.name}/elements[${pos}]`);
         return data[0].data;
     }
 
@@ -36,7 +64,7 @@ export class Catalog<T,U> implements ICatalog<T,U>{
     }
 
     public GetElement(index: T): U{
-        return this.elements.find(e => e.index = index).data;
+        return this.elements.find(e => deepEqual(e.index, index)).data;
     }
 
     public Count(): number {
@@ -44,14 +72,19 @@ export class Catalog<T,U> implements ICatalog<T,U>{
     }
 
     public HasElement(index: T): boolean {
-        if(this.elements.find(e => e.index == index)) {
-            return false;
-        } else {
+        console.log(this.elements);
+        if(this.elements.find(e => deepEqual(e.index, index))) {
             return true;
+        } else {
+            return false;
         }
     }
     public Clear(): Array<{index: T, data: U}> {
-        this.db.delete(`${name}/elements`);
-        return this.elements.splice(0);
+        this.db.delete(`/${this.name}/elements`);
+        return this.elements.splice(0, this.elements.length);
     }
+}
+
+class DataPoint<T, U>{
+    constructor(public index:T, public data:U) {}
 }

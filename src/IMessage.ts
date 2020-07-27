@@ -1,8 +1,9 @@
-import { IUser } from "./IUser";
+import { IChatUser } from "./IChatUser";
+import { IChannel } from "./IChannel";
 
 export interface IMessage{
-    Platform: string;
-    Channel: string;
-    User: IUser;
+    Channel: IChannel;
+    User: IChatUser;
     Message: string;
+    Self: boolean;
 }

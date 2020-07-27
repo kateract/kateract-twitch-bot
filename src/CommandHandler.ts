@@ -1,30 +1,22 @@
-import { ChatUserstate, Client } from 'tmi.js';
 import { MultiStreamHandler } from './MultiStreamHandler';
-import { JsonDB } from 'node-json-db';
 import { StorageService } from './StorageService';
+import { ChatManager } from './ChatManager';
+import { IChatUser } from './IChatUser';
+import { IChannel } from './IChannel';
+
 export class CommandHandler {
-    private currentRoll: number;
     constructor(
-        private readonly client: Client,
-        private readonly primaryChannel: string,
-        private readonly timeoutInterval: number,
+        private readonly manager: ChatManager,
         private readonly multi: MultiStreamHandler,
         storage: StorageService) {
-        this.currentRoll = 0;
+            manager.Chats$.subscribe(msg => this.ParseCommand(msg.Channel, msg.User, msg.Message, msg.Self))
     }
 
-    public ParseCommand(channel: string, tags: ChatUserstate, message: string): void {
+    public ParseCommand(channel: IChannel, user: IChatUser, message: string, self: boolean): void {
         let parts = message.split(' ');
         if (parts[0] === "!multi") {
-            this.multi.Handle(parts, channel, tags);
+            this.multi.Handle(parts, channel, user);
         }
     }
 
-    public RollTimerChats(primaryChannel: string, rollChats: string[]): void {
-        setTimeout(() =>{
-            this.client.say(primaryChannel, rollChats[this.currentRoll]);
-            this.currentRoll = (this.currentRoll + 1) % rollChats.length;
-            this.RollTimerChats(primaryChannel, rollChats);
-        }, this.timeoutInterval);
-    }
 }
