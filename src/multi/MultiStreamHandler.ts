@@ -173,7 +173,9 @@ export class MultiStreamHandler
         if (!this.members.HasElement(this.primaryChannel)) {
             let primary =  this.streamers.GetElement(this.primaryChannel)
             this.members.AddElement(this.primaryChannel, primary);
-            primary.Excludes.forEach(e => this.corelay.AddExclude(e));
+            if (primary.Excludes){
+                primary.Excludes.forEach(e => this.corelay.AddExclude(e));
+            }
         }
     }
 }

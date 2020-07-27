@@ -12,7 +12,14 @@ import { ChatManager } from './chat/ChatManager';
 import { IChannel } from './chat/IChannel';
 import { FriendCodeHandler } from './multi/FriendCodeHandler';
 
-const primaryChannel: IChannel = {Platform: 'twitch', Channel: "kateract"};
+let args = process.argv.slice(2)
+let inputPlatform = 'twitch'
+let inputChannel = 'kateract'
+if(args.length >= 2){
+    inputPlatform = args[0];
+    inputChannel = args[1];
+}
+const primaryChannel: IChannel = {Platform: inputPlatform, Channel: inputChannel};
 const timeoutInterval: number = 5*60*1000;
 let rollChats = ["Nintendo Monday is brought to you by theSHED! Find out more about this great gaming community and it's members by visiting https://theshed.gg",
                  "Use the !multi command to check out all the streamers live!"]

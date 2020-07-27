@@ -40,7 +40,7 @@ export class TwitchChatService implements IChatService
     }
 
     LeaveChannel(channel: string) {
-        this.client.part(channel);
+        this.client.part(channel).then(res => console.log(`Left #${channel}`));
     }
 
     SendMessage(channel: string, message: string) {
