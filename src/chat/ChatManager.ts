@@ -70,6 +70,10 @@ export class ChatManager
         //console.log(`channel list: ${list.map(c => c.Channel).join(',')}`);
         return list;
     }
+
+    public PlatformAbbrev(platform: string): string {
+        return this.chatServices.find(c => c.Platform === platform).MultiPlatformAbbrev
+    }
 }
 
 class Channel implements IChannel {

@@ -62,7 +62,7 @@ export class MultiStreamHandler
         let uri: string = `https://multi.raredrop.co`;
         let list = this.members.ListElements()
         for (let i = 0; i < list.length; i++) {
-            uri += `/t${list[i].data.Name}`;
+            uri += `/${this.manager.PlatformAbbrev(list[i].data.Platform)}${list[i].data.Name}`;
         }
         //console.log(`Advertising on ${channel.Platform}, in ${channel.Channel}: ${uri}`)
         this.manager.SendMessage(channel, `Check out all the streamers here: ${uri}`);

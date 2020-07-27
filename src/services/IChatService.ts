@@ -6,6 +6,7 @@ export interface IChatService
     Connected$: Subject<boolean>;
     Connected: boolean;
     Platform: string;
+    MultiPlatformAbbrev: string;
     MessageQueue: Observable<IMessage>;
     GetChannels(): Array<string>;
     JoinChannel(channel: string): void;
