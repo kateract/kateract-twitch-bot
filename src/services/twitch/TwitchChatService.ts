@@ -1,7 +1,7 @@
-import { IChatService } from "./IChatService";
+import { IChatService } from "../../chat/IChatService";
 import { Observable, fromEvent, Subject } from "rxjs";
 import { map } from "rxjs/operators";
-import { IMessage } from "./IMessage";
+import { IMessage } from "../../chat/IMessage";
 import { Client, Options, ChatUserstate } from "tmi.js";
 import { TwitchMessage } from './TwitchMessage';
 

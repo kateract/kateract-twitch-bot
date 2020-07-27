@@ -1,10 +1,10 @@
 import { CostreamRelayHandler } from "./CostreamRelayHandler";
-import { StorageService } from "./StorageService";
-import { ICatalog } from "./ICatalog";
-import { Streamer } from "./Streamer";
-import { ChatManager } from "./ChatManager";
-import { IChatUser } from "./IChatUser";
-import { IChannel } from "./IChannel";
+import { StorageService } from "../storage/StorageService";
+import { ICatalog } from "../storage/ICatalog";
+import { Streamer } from "../chat/Streamer";
+import { ChatManager } from "../chat/ChatManager";
+import { IChatUser } from "../chat/IChatUser";
+import { IChannel } from "../chat/IChannel";
 
 export class MultiStreamHandler
 {

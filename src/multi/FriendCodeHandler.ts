@@ -1,8 +1,8 @@
-import { JsonDB } from "node-json-db";
+import { ChatManager } from "../chat/ChatManager";
 
 export class FriendCodeHandler
 {
-    constructor(private readonly db: JsonDB) {}
+    constructor(private readonly manager: ChatManager) {}
 
     public RegisterFriendCode(username: string, friendcode: string): void {
         let friend = new FriendCode(username, friendcode);

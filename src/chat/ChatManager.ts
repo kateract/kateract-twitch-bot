@@ -59,7 +59,7 @@ export class ChatManager
         }
         else
         {
-            //console.log(`connection status for ${channel.Platform}: ${service.Connected}`)
+            console.log(`connection status for ${channel.Platform}: ${service.Connected}`)
         }
         return false;
     }

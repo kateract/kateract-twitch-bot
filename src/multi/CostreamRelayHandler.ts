@@ -1,7 +1,7 @@
 import { Client, ChatUserstate } from 'tmi.js';
-import { ChatManager } from './ChatManager';
-import { IChannel } from './IChannel';
-import { IChatUser } from './IChatUser';
+import { ChatManager } from '../chat/ChatManager';
+import { IChannel } from '../chat/IChannel';
+import { IChatUser } from '../chat/IChatUser';
 
 export class CostreamRelayHandler 
 {

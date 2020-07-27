@@ -1,6 +1,6 @@
-import { IMessage } from "./IMessage";
-import { IChatUser } from "./IChatUser";
-import { IChannel } from "./IChannel";
+import { IMessage } from "../../chat/IMessage";
+import { IChatUser } from "../../chat/IChatUser";
+import { IChannel } from "../../chat/IChannel";
 import { ChatUserstate } from "tmi.js";
 
 export class TwitchMessage implements IMessage{

@@ -1,5 +1,5 @@
-import { MultiStreamHandler } from './MultiStreamHandler';
-import { StorageService } from './StorageService';
+import { MultiStreamHandler } from '../multi/MultiStreamHandler';
+import { StorageService } from '../storage/StorageService';
 import { ChatManager } from './ChatManager';
 import { IChatUser } from './IChatUser';
 import { IChannel } from './IChannel';

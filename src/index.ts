@@ -1,15 +1,15 @@
-import { Client, Options, ChatUserstate } from 'tmi.js';
+import { Options } from 'tmi.js';
 import { JsonDB } from "node-json-db";
 import { Config } from "node-json-db/dist/lib/JsonDBConfig";
-import { MultiStreamHandler } from "./MultiStreamHandler";
+import { MultiStreamHandler } from "./multi/MultiStreamHandler";
 import id from "../auth.json";
-import { CommandHandler } from './CommandHandler';
-import { CostreamRelayHandler } from './CostreamRelayHandler';
-import { StorageService } from './StorageService';
-import { TwitchChatService } from './TwitchChatService';
-import { IChatService } from './IChatService';
-import { ChatManager } from './ChatManager';
-import { IChannel } from './IChannel';
+import { CommandHandler } from './chat/CommandHandler';
+import { CostreamRelayHandler } from './multi/CostreamRelayHandler';
+import { StorageService } from './storage/StorageService';
+import { TwitchChatService } from './services/twitch/TwitchChatService';
+import { IChatService } from './chat/IChatService';
+import { ChatManager } from './chat/ChatManager';
+import { IChannel } from './chat/IChannel';
 
 const primaryChannel: IChannel = {Platform: 'twitch', Channel: "kateract"};
 const timeoutInterval: number = 5*60*1000;
