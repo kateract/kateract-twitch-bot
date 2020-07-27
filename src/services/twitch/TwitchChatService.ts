@@ -1,4 +1,4 @@
-import { IChatService } from "../../chat/IChatService";
+import { IChatService } from "../IChatService";
 import { Observable, fromEvent, Subject } from "rxjs";
 import { map } from "rxjs/operators";
 import { IMessage } from "../../chat/IMessage";

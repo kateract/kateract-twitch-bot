@@ -59,7 +59,7 @@ export class MultiStreamHandler
     }
 
     private AdvertiseCostream(channel: IChannel): void {
-        let uri: string = `https://multi.raredrop.co/t${this.primaryChannel.Channel}`;
+        let uri: string = `https://multi.raredrop.co`;
         let list = this.members.ListElements()
         for (let i = 0; i < list.length; i++) {
             uri += `/t${list[i].data.Name}`;

@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { IMessage } from './IMessage';
+import { IMessage } from '../chat/IMessage';
 
 export interface IChatService
 {

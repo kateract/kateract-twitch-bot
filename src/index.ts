@@ -7,9 +7,10 @@ import { CommandHandler } from './chat/CommandHandler';
 import { CostreamRelayHandler } from './multi/CostreamRelayHandler';
 import { StorageService } from './storage/StorageService';
 import { TwitchChatService } from './services/twitch/TwitchChatService';
-import { IChatService } from './chat/IChatService';
+import { IChatService } from './services/IChatService';
 import { ChatManager } from './chat/ChatManager';
 import { IChannel } from './chat/IChannel';
+import { FriendCodeHandler } from './multi/FriendCodeHandler';
 
 const primaryChannel: IChannel = {Platform: 'twitch', Channel: "kateract"};
 const timeoutInterval: number = 5*60*1000;
@@ -19,7 +20,7 @@ let rollChats = ["Nintendo Monday is brought to you by theSHED! Find out more ab
 const options: Options = {
     identity: id,
     options: {
-        debug: true,
+        debug: false,
     },
     connection: {
         reconnect: true,
@@ -40,6 +41,7 @@ manager.Chats$.subscribe(chat => {
 })
 const corelay: CostreamRelayHandler = new CostreamRelayHandler(manager);
 const multi: MultiStreamHandler = new MultiStreamHandler(manager, primaryChannel, corelay, storageService);
-const command: CommandHandler = new CommandHandler(manager, multi, storageService);
+const friend: FriendCodeHandler = new FriendCodeHandler(manager, storageService)
+const command: CommandHandler = new CommandHandler(manager, multi, friend, storageService);
 
 

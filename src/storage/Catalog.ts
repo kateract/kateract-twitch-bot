@@ -95,7 +95,6 @@ export class Catalog<T,U> implements ICatalog<T,U>{
         return false;
     }
     private FindDataPointIndex(index: T): number {
-        console.log('finding %O', index)
         return this.elements.findIndex(e => deepEqual(e.index, index))
     }
     private FindDataPoint(index: T): DataPoint<T,U>
