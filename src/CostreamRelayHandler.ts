@@ -20,7 +20,7 @@ export class CostreamRelayHandler
         if (this.subscribers.indexOf({Platform: platform, Channel: channel}) < 0){
             this.subscribers.push({Platform: platform, Channel: channel});
         }
-        console.log(this.subscribers)
+        //console.log(this.subscribers)
 
         return this.subscribers.length > 0;
     }
@@ -32,11 +32,11 @@ export class CostreamRelayHandler
 
     public PushMessage(channel: IChannel, user: IChatUser, message: string, self: boolean)
     {
-        console.log (`Message from ${channel.Channel}! Self? ${self}`)
+        //console.log (`Message from ${channel.Channel}! Self? ${self}`)
         
         if(!self){//} && !(this.excludes.indexOf(user.Username) >= 0)){
             this.subscribers.filter(s => !(s.Channel === channel.Channel && s.Platform === channel.Platform)).forEach(s => {
-                console.log(`relaying message from ${channel} to #${s}!`)
+                //console.log(`relaying message from ${channel} to #${s}!`)
                 this.manager.SendMessage(s, `[#${channel.Channel}] ${user.Username}: ${message}`);
             });
         }

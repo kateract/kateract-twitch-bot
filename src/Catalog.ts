@@ -10,17 +10,17 @@ export class Catalog<T,U> implements ICatalog<T,U>{
     public static GetCatalog<T,U>(name:string, db: JsonDB): Catalog<T,U> {
         let elements: Array<{index: T, data: U}>;
         if (db.exists(`/${name}`)) {
-            console.log(`db for ${name} exists, loading...`)
+            //console.log(`db for ${name} exists, loading...`)
             let data = db.getData(`/${name}`);
             if (data.elements) {
                 
                 elements = data.elements;
-                console.log(data);
+                //console.log(data);
             } 
             else 
             {
-                console.log(`data doesn't element:`)
-                console.log(data);
+                //console.log(`data doesn't element:`)
+                //console.log(data);
                 elements = new Array<{index: T, data: U}>();
             }
             return new Catalog<T, U>(db, elements, name);
@@ -41,12 +41,12 @@ export class Catalog<T,U> implements ICatalog<T,U>{
             }
         }
         let pos = this.elements.push({index, data}) - 1;
-        console.log(this.name);
+        //console.log(this.name);
         let dp =  new DataPoint<T, U>(index, data);
         if (dp){
             this.db.push(`/${this.name}/elements[${pos}]`,dp);
         } else{ 
-            console.log(`${index}, ${data}`)
+            //console.log(`${index}, ${data}`)
         }
         return index;
     }
@@ -72,7 +72,7 @@ export class Catalog<T,U> implements ICatalog<T,U>{
     }
 
     public HasElement(index: T): boolean {
-        console.log(this.elements);
+        //console.log(this.elements);
         if(this.elements.find(e => deepEqual(e.index, index))) {
             return true;
         } else {

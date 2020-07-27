@@ -19,38 +19,36 @@ export class MultiStreamHandler
         storage: StorageService) 
     {
         this.members = storage.GetCatalog<IChannel, Streamer>('members');
-        console.log(this.members.ListElements());
+        //console.log(this.members.ListElements());
         this.streamers = storage.GetCatalog<IChannel, Streamer>('streamers');
         this.manager.Connected$.subscribe(obs => this.ResolveChannels());
     }
 
     public Handle(parts: string[], channel: IChannel, user: IChatUser): void
     {
-        let chan:Channel = channel;
-        //console.log(tags);
         if (parts.length == 1) {
-            this.AdvertiseCostream(chan)
+            this.AdvertiseCostream(channel)
         }
         else if ((user.Broadcaster || user.Moderator) 
             && parts.length > 1 && parts[1].toLowerCase() == "add") {
-            this.AddCostreamers(chan.Platform, parts);
+            this.AddCostreamers(channel.Platform, parts);
         }
         else if ((user.Broadcaster || user.Moderator) 
             && parts.length > 1 && parts[1].toLowerCase() == "remove") {
-            this.RemoveCostreamers(chan.Platform, parts);
+            this.RemoveCostreamers(channel.Platform, parts);
         }else if ((user.Broadcaster || user.Moderator) 
             && parts.length > 1 && parts[1].toLowerCase() == "clear") {
             this.ClearCostream();
         }
         else if ((user.Broadcaster || user.Moderator) 
             && parts.length > 1 && parts[1].toLowerCase() == "subscribe") {
-            this.Subscribe(chan.Platform, user)
+            this.Subscribe(channel.Platform, user)
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "unsubscribe") {
-            this.Unsubscribe(chan.Platform, user);
+            this.Unsubscribe(channel.Platform, user);
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "exclude") {
-            this.Exclude(chan, parts[2]);
+            this.Exclude(channel, parts[2]);
         }
     }
 
@@ -60,32 +58,32 @@ export class MultiStreamHandler
         for (let i = 0; i < list.length; i++) {
             uri += `/t${list[i].data.Name}`;
         }
-        console.log(`Advertising on ${channel.Platform}, in ${channel.Channel}: ${uri}`)
+        //console.log(`Advertising on ${channel.Platform}, in ${channel.Channel}: ${uri}`)
         this.manager.SendMessage(channel, `Check out all the streamers here: ${uri}`);
 
     }
 
     private AddCostreamers(platform: string, parts: string[]): void {
-        console.log(`Adding streamers on ${platform}: ${parts.slice(2).join(',')}`);
+        //console.log(`Adding streamers on ${platform}: ${parts.slice(2).join(',')}`);
         for (let i = 2; i < parts.length; i++) {
-            let chan: Channel = {Platform: platform,Channel:parts[i]}
-            console.log(chan);
+            let chan: IChannel = {Platform: platform,Channel:parts[i]}
+            //console.log(chan);
             if (parts[i].trim().length > 0 && !this.members.HasElement(chan)) {
                 if (this.streamers.HasElement(chan) && this.streamers.GetElement(chan).Platform == platform){
                     this.members.AddElement(chan, this.streamers.GetElement(chan));
-                    console.log(this.members.ListElements())
+                    //console.log(this.members.ListElements())
                 } else {
                     let streamer = new Streamer();
                     streamer.Name = parts[i];
                     streamer.Platform = platform;
                     this.members.AddElement({Platform: platform, Channel: streamer.Name}, streamer);
                     this.streamers.AddElement({Platform: platform, Channel: streamer.Name}, streamer);
-                    console.log(this.members.ListElements());
+                    //console.log(this.members.ListElements());
                 }
             }
             else{
-                console.log(`${parts[i].trim()}`);
-                console.log(this.members.ListElements());
+                //console.log(`${parts[i].trim()}`);
+                //console.log(this.members.ListElements());
             }
         }
         this.ResolveChannels();
@@ -147,18 +145,18 @@ export class MultiStreamHandler
     }
 }
 
-class Channel implements IChannel {
-    constructor(platform: string, channel: string) {
-        this.Platform = platform;
-        this.Channel = channel;
-    }
-    Platform: string;
-    Channel: string;
-    public toString(): string {
-        return Channel.toString(this);
-    }
-    public static toString(channel:Channel): string
-    {
-        return `${channel.Platform}.${channel.Channel}`
-    }
-}
+// class Channel implements IChannel {
+//     constructor(platform: string, channel: string) {
+//         this.Platform = platform;
+//         this.Channel = channel;
+//     }
+//     Platform: string;
+//     Channel: string;
+//     public toString(): string {
+//         return Channel.toString(this);
+//     }
+//     public static toString(channel:Channel): string
+//     {
+//         return `${channel.Platform}.${channel.Channel}`
+//     }
+// }

@@ -17,14 +17,14 @@ export class StorageService {
     public GetCatalog<T, U>(name: string): ICatalog<T, U> {
         let cata = this.catalogs.find(c => c.name === name);
         if (!cata) {
-            console.log(`catalog ${name} not loaded, retrieving...`);
+            //console.log(`catalog ${name} not loaded, retrieving...`);
             cata = {
                 name: name,
                 catalog: Catalog.GetCatalog<T, U>(name, this.db)
             }
             this.catalogs.push(cata);
         }
-        console.log(cata);
+        //console.log(cata);
         return cata.catalog;
     }
 

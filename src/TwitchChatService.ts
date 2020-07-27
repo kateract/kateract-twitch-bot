@@ -18,12 +18,12 @@ export class TwitchChatService implements IChatService
         this.client.on("connected", (address: any, port: any) => {
             this.Connected = true;
             this.Connected$.next(true);
-            console.log(`Connected to ${address}:${port} as ${this.client.getUsername()}`);
+            //console.log(`Connected to ${address}:${port} as ${this.client.getUsername()}`);
         });
         this.client.on("disconnected", (reason: string) => {
             this.Connected = false;
             this.Connected$.next(false);
-            console.log(`disconnected from ${this.Platform}: ${reason}`)
+            //console.log(`disconnected from ${this.Platform}: ${reason}`)
         })
         this.MessageQueue = fromEvent<IMessage>(this.client, "message", 
             (channel: string, tags:ChatUserstate, message:string, self:boolean) =>
@@ -52,7 +52,7 @@ export class TwitchChatService implements IChatService
 
     GetChannels(): Array<string> {
         let list = this.client.getChannels().map(c => c.substr(1));
-        console.log(`twitch channel list: ${list.join(', ')}`)
+        //console.log(`twitch channel list: ${list.join(', ')}`)
         return list;
     }
     

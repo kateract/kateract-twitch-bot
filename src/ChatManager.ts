@@ -20,14 +20,14 @@ export class ChatManager
             service.Connected$.subscribe(obs => {
                 if(obs) {
                     this.Connected$.next(service.Platform);
-                    console.log(`connected to ${service.Platform}`)
+                    //console.log(`connected to ${service.Platform}`)
                 }
             })
         }
     }
 
     public JoinChannel(channel: IChannel){
-        console.log(`request to join ${channel.Channel} on ${channel.Platform}`)
+        //console.log(`request to join ${channel.Channel} on ${channel.Platform}`)
         let service = this.chatServices.find(s => s.Platform == channel.Platform)
         if(service.Connected)
         {
@@ -59,7 +59,7 @@ export class ChatManager
         }
         else
         {
-            console.log(`connection status for ${channel.Platform}: ${service.Connected}`)
+            //console.log(`connection status for ${channel.Platform}: ${service.Connected}`)
         }
         return false;
     }
@@ -67,7 +67,7 @@ export class ChatManager
     public CurrentChannels(): Array<IChannel> {
         let list: Array<IChannel> = new Array<IChannel>();
         this.chatServices.map(s => list = list.concat(s.GetChannels().map(c => new Channel(s.Platform, c))));
-        console.log(`channel list: ${list.map(c => c.Channel).join(',')}`);
+        //console.log(`channel list: ${list.map(c => c.Channel).join(',')}`);
         return list;
     }
 }
