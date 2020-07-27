@@ -84,20 +84,23 @@ export class Catalog<T,U> implements ICatalog<T,U>{
         return this.elements.splice(0, this.elements.length);
     }
 
-    public UpdateElement(index: T, data: U)
+    public UpdateElement(index: T, data: U): boolean
     {
         let idx = this.FindDataPointIndex(index);
         if (idx >= 0) {
             this.elements[idx].data = data;
             this.db.push(`/${this.name}/elements[${idx}]`, this.elements[idx]);
+            return true;
         }
+        return false;
     }
     private FindDataPointIndex(index: T): number {
+        console.log('finding %O', index)
         return this.elements.findIndex(e => deepEqual(e.index, index))
     }
     private FindDataPoint(index: T): DataPoint<T,U>
     {
-        return this.elements.find(e => deepEqual(e.index, index))
+        return this.elements[this.FindDataPointIndex(index)];
     }
 }
 

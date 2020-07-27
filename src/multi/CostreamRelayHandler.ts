@@ -17,26 +17,21 @@ export class CostreamRelayHandler
 
     public AddSubscriber(platform: string, channel: string) : boolean
     {
-        if (this.subscribers.indexOf({Platform: platform, Channel: channel}) < 0){
+        if (this.subscribers.findIndex(i => i.Platform === platform && i.Channel === channel) < 0){
             this.subscribers.push({Platform: platform, Channel: channel});
         }
-        //console.log(this.subscribers)
-
         return this.subscribers.length > 0;
     }
 
     public RemoveSubscriber(platform: string, channel: string)
     {
-        this.subscribers.splice(this.subscribers.indexOf({Platform: platform, Channel: channel}),1);
+        this.subscribers.splice(this.subscribers.findIndex(i => i.Platform === platform && i.Channel === channel),1);
     }
 
     public PushMessage(channel: IChannel, user: IChatUser, message: string, self: boolean)
     {
-        //console.log (`Message from ${channel.Channel}! Self? ${self}`)
-        
-        if(!self){//} && !(this.excludes.indexOf(user.Username) >= 0)){
+        if(!self && !this.excludes.includes(user.Username)){
             this.subscribers.filter(s => !(s.Channel === channel.Channel && s.Platform === channel.Platform)).forEach(s => {
-                //console.log(`relaying message from ${channel} to #${s}!`)
                 this.manager.SendMessage(s, `[#${channel.Channel}] ${user.Username}: ${message}`);
             });
         }
@@ -47,6 +42,9 @@ export class CostreamRelayHandler
     }
 
     public AddExclude(user: string) {
-        this.excludes.push(user);
+        if (!this.excludes.includes(user))
+        {
+            this.excludes.push(user);
+        }
     }
 }

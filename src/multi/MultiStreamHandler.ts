@@ -18,9 +18,15 @@ export class MultiStreamHandler
         private readonly corelay: CostreamRelayHandler  ,
         storage: StorageService) 
     {
-        this.members = storage.GetCatalog<IChannel, Streamer>('members');
-        //console.log(this.members.ListElements());
         this.streamers = storage.GetCatalog<IChannel, Streamer>('streamers');
+        this.members = storage.GetCatalog<IChannel, Streamer>('members');
+        this.AddPrimaryStreamer();
+        this.members.ListElements().forEach(m => {
+            if(m.data.Excludes) {
+                m.data.Excludes.forEach(e => this.corelay.AddExclude(e))
+            }
+        });
+        //console.log(this.members.ListElements());
         this.manager.Connected$.subscribe(obs => this.ResolveChannels());
     }
 
@@ -69,16 +75,21 @@ export class MultiStreamHandler
             let chan: IChannel = {Platform: platform,Channel:parts[i]}
             //console.log(chan);
             if (parts[i].trim().length > 0 && !this.members.HasElement(chan)) {
-                if (this.streamers.HasElement(chan) && this.streamers.GetElement(chan).Platform == platform){
-                    this.members.AddElement(chan, this.streamers.GetElement(chan));
+                let streamer: Streamer;
+                if (this.streamers.HasElement(chan)){
+                    streamer = this.streamers.GetElement(chan);
                     //console.log(this.members.ListElements())
                 } else {
-                    let streamer = new Streamer();
+                    streamer = new Streamer();
                     streamer.Name = parts[i];
                     streamer.Platform = platform;
-                    this.members.AddElement({Platform: platform, Channel: streamer.Name}, streamer);
+                    streamer.Excludes = new Array<string>();
                     this.streamers.AddElement({Platform: platform, Channel: streamer.Name}, streamer);
                     //console.log(this.members.ListElements());
+                }
+                this.members.AddElement(chan, this.streamers.GetElement(chan));
+                if (streamer.Excludes) {
+                    streamer.Excludes.forEach(e => this.corelay.AddExclude(e))
                 }
             }
             else{
@@ -101,6 +112,7 @@ export class MultiStreamHandler
 
     private ClearCostream(): void {
         this.members.Clear();
+        this.AddPrimaryStreamer();
         this.ResolveChannels();
     }
 
@@ -129,34 +141,39 @@ export class MultiStreamHandler
         
         let list = this.members.ListElements();
         let joined = this.manager.CurrentChannels();
-        //console.log(`Resolving channels: proposed: ${list.map(l => l.index.Channel).join(',')}, current: ${joined}`)
+        //console.log(`Resolving channels: proposed: ${list.map(l => l.index.Channel).join(',')}, current: ${joined.map(j => j.Channel).join(',')}`)
         list.filter(s => !this.manager.InChannel(s.index))
             .map(c => this.manager.JoinChannel(c.index));
-        this.manager.CurrentChannels()
-            .filter(c => !list.map(f => f.index).includes(c) 
-                && !(c.Channel === this.primaryChannel.Channel && c.Platform === this.primaryChannel.Platform))
+        joined.filter(c => !list.find(f => f.index.Platform === c.Platform && f.index.Channel === c.Channel))
             .map(c => this.manager.LeaveChannel(c));
     }
     
     public Exclude(channel: IChannel, user: string)
     {
         let streamer = this.streamers.GetElement(channel);
-        streamer.Excludes.push(user);
+        if (!streamer.Excludes)
+        {
+            streamer.Excludes = new Array<string>();
+        }
+        if(!streamer.Excludes.includes(user)){
+            streamer.Excludes.push(user);
+        }
+        this.streamers.UpdateElement(channel, streamer);
+        this.corelay.AddExclude(user);
+    }
+
+    private AddPrimaryStreamer(): void {
+        if (!this.streamers.HasElement(this.primaryChannel)){
+            let s = new Streamer()
+            s.Platform = this.primaryChannel.Platform;
+            s.Name = this.primaryChannel.Channel;
+            s.Excludes = new Array<string>();
+            this.streamers.AddElement(this.primaryChannel, s);
+        }
+        if (!this.members.HasElement(this.primaryChannel)) {
+            let primary =  this.streamers.GetElement(this.primaryChannel)
+            this.members.AddElement(this.primaryChannel, primary);
+            primary.Excludes.forEach(e => this.corelay.AddExclude(e));
+        }
     }
 }
-
-// class Channel implements IChannel {
-//     constructor(platform: string, channel: string) {
-//         this.Platform = platform;
-//         this.Channel = channel;
-//     }
-//     Platform: string;
-//     Channel: string;
-//     public toString(): string {
-//         return Channel.toString(this);
-//     }
-//     public static toString(channel:Channel): string
-//     {
-//         return `${channel.Platform}.${channel.Channel}`
-//     }
-// }

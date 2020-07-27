@@ -5,5 +5,6 @@ export interface ICatalog<T,U>{
     ListElements():Array<{index: T, data: U }>
     Count():number;
     HasElement(index:T):boolean;
+    UpdateElement(index: T, data: U): boolean;
     Clear():void;
 }
