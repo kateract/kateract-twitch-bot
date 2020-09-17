@@ -54,7 +54,7 @@ export class MultiStreamHandler
             this.Unsubscribe(channel.Platform, user);
         }
         else if (parts.length > 1 && parts[1].toLowerCase() == "exclude") {
-            this.Exclude(channel, parts[2]);
+            this.Exclude(channel, parts[2].toLowerCase());
         }
     }
 
@@ -72,7 +72,7 @@ export class MultiStreamHandler
     private AddCostreamers(platform: string, parts: string[]): void {
         //console.log(`Adding streamers on ${platform}: ${parts.slice(2).join(',')}`);
         for (let i = 2; i < parts.length; i++) {
-            let chan: IChannel = {Platform: platform,Channel:parts[i]}
+            let chan: IChannel = {Platform: platform,Channel:parts[i].toLowerCase()}
             //console.log(chan);
             if (parts[i].trim().length > 0 && !this.members.HasElement(chan)) {
                 let streamer: Streamer;
@@ -84,7 +84,7 @@ export class MultiStreamHandler
                     streamer.Name = parts[i];
                     streamer.Platform = platform;
                     streamer.Excludes = new Array<string>();
-                    this.streamers.AddElement({Platform: platform, Channel: streamer.Name}, streamer);
+                    this.streamers.AddElement({Platform: platform, Channel: streamer.Name.toLowerCase()}, streamer);
                     //console.log(this.members.ListElements());
                 }
                 this.members.AddElement(chan, this.streamers.GetElement(chan));
@@ -104,7 +104,7 @@ export class MultiStreamHandler
     {
         channels.forEach(c => {
 
-            this.members.RemoveElement({Platform: platform, Channel: c});
+            this.members.RemoveElement({Platform: platform, Channel: c.toLowerCase()});
         });
     
         this.ResolveChannels();
@@ -121,11 +121,11 @@ export class MultiStreamHandler
         {
             this.subscribing = true;
         }
-        this.corelay.AddSubscriber(platform, user.Username)
+        this.corelay.AddSubscriber(platform, user.Username.toLowerCase())
     }
 
     private Unsubscribe(platform: string, user: IChatUser): void {
-        this.corelay.RemoveSubscriber(platform, user.Username);
+        this.corelay.RemoveSubscriber(platform, user.Username.toLowerCase());
         if (!this.corelay.AreSubscribers)
         {
             this.subscribing = false;

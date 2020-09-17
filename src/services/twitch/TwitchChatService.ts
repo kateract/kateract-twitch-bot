@@ -1,6 +1,5 @@
 import { IChatService } from "../IChatService";
 import { Observable, fromEvent, Subject } from "rxjs";
-import { map } from "rxjs/operators";
 import { IMessage } from "../../chat/IMessage";
 import { Client, Options, ChatUserstate } from "tmi.js";
 import { TwitchMessage } from './TwitchMessage';
@@ -28,7 +27,7 @@ export class TwitchChatService implements IChatService
         })
         this.MessageQueue = fromEvent<IMessage>(this.client, "message", 
             (channel: string, tags:ChatUserstate, message:string, self:boolean) =>
-            { return new TwitchMessage({Platform: this.Platform, Channel: channel.substr(1)}, tags, message, self)});
+            { return new TwitchMessage({Platform: this.Platform, Channel: channel.substr(1).toLowerCase()}, tags, message, self)});
         
         this.client.connect().catch((err: any) => console.log(err));
         
@@ -53,7 +52,6 @@ export class TwitchChatService implements IChatService
 
     GetChannels(): Array<string> {
         let list = this.client.getChannels().map(c => c.substr(1));
-        //console.log(`twitch channel list: ${list.join(', ')}`)
         return list;
     }
     
